@@ -1,35 +1,30 @@
 package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 
 @Entity
 public class SocietyAmenities {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int societyId;
-
+    private int societyAmenitiesId;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     public SocietyAmenities() {
     }
 
-    public SocietyAmenities(int societyId, String name, LocalDateTime createdAt) {
-        this.societyId = societyId;
+    public SocietyAmenities(int societyAmenitiesId, String name) {
+        this.societyAmenitiesId = societyAmenitiesId;
         this.name = name;
-        this.createdAt = createdAt;
     }
 
-    public int getSocietyId() {
-        return societyId;
+    public int getSocietyAmenitiesId() {
+        return societyAmenitiesId;
     }
 
-    public void setSocietyId(int societyId) {
-        this.societyId = societyId;
+    public void setSocietyAmenitiesId(int societyAmenitiesId) {
+        this.societyAmenitiesId = societyAmenitiesId;
     }
 
     public String getName() {
@@ -38,13 +33,5 @@ public class SocietyAmenities {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

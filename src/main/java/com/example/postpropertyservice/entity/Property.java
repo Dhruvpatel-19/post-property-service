@@ -2,6 +2,7 @@ package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 
@@ -12,20 +13,33 @@ public class Property {
     private int propertyId;
 
     @Column(nullable = false)
+    private String price;
+
+    @Column(nullable = false)
+    private String area;
+
+    @Column(nullable = false)
     private int action;
 
     @Column(nullable = false)
     private int ageYears;
+
     @Column(nullable = false)
     private String furnishing;
     @Column(nullable = false)
-    private String availableFrom;
-    @Column(nullable = false)
-    private String availableTo;
+    private Date availableFrom;
+
+    private Date availableTo;
+
     @Column(nullable = false)
     private String parkingAvailability;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(targetEntity = Image.class , cascade = CascadeType.ALL)
+    @JoinColumn(name="property_id_fk" , referencedColumnName = "propertyId" , nullable = false)
+    private List<Image> images;
 
     @OneToMany(targetEntity = SocietyAmenities.class , cascade = CascadeType.ALL)
     @JoinColumn(name="property_id_fk",referencedColumnName = "propertyId" , nullable = false)
@@ -35,11 +49,11 @@ public class Property {
     @JoinColumn(name="property_id_fk",referencedColumnName = "propertyId" , nullable = false)
     private List<FlatAmenities> flatAmenities;
 
-    @OneToOne(targetEntity = Category.class , cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = Category.class)
     @JoinColumn(name = "category_id_fk" , referencedColumnName = "categoryId" , nullable = false)
     private Category category;
 
-    @OneToOne(targetEntity = Type.class , cascade = CascadeType.ALL)
+    @OneToOne(targetEntity = Type.class)
     @JoinColumn(name = "type_id_fk" , referencedColumnName = "typeId" , nullable = false)
     private Type type;
 
@@ -47,14 +61,14 @@ public class Property {
     @JoinColumn(name = "address_id_fk" , referencedColumnName = "addressId" , nullable = false)
     private Address address;
 
-
-
-
     public Property() {
     }
 
-    public Property(int propertyId, int action, int ageYears, String furnishing, String availableFrom, String availableTo, String parkingAvailability, LocalDateTime createdAt, List<SocietyAmenities> societyAmenities, List<FlatAmenities> flatAmenities, Category category) {
+    public Property(int propertyId, String price, List<Image> images, String area, int action, int ageYears, String furnishing, Date availableFrom, Date availableTo, String parkingAvailability, LocalDateTime createdAt, List<SocietyAmenities> societyAmenities, List<FlatAmenities> flatAmenities, Category category, Type type, Address address) {
         this.propertyId = propertyId;
+        this.price = price;
+        this.images = images;
+        this.area = area;
         this.action = action;
         this.ageYears = ageYears;
         this.furnishing = furnishing;
@@ -65,6 +79,8 @@ public class Property {
         this.societyAmenities = societyAmenities;
         this.flatAmenities = flatAmenities;
         this.category = category;
+        this.type = type;
+        this.address = address;
     }
 
     public int getPropertyId() {
@@ -73,6 +89,30 @@ public class Property {
 
     public void setPropertyId(int propertyId) {
         this.propertyId = propertyId;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
     }
 
     public int getAction() {
@@ -99,19 +139,19 @@ public class Property {
         this.furnishing = furnishing;
     }
 
-    public String getAvailableFrom() {
+    public Date getAvailableFrom() {
         return availableFrom;
     }
 
-    public void setAvailableFrom(String availableFrom) {
+    public void setAvailableFrom(Date availableFrom) {
         this.availableFrom = availableFrom;
     }
 
-    public String getAvailableTo() {
+    public Date getAvailableTo() {
         return availableTo;
     }
 
-    public void setAvailableTo(String availableTo) {
+    public void setAvailableTo(Date availableTo) {
         this.availableTo = availableTo;
     }
 
@@ -153,5 +193,21 @@ public class Property {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 }

@@ -1,34 +1,31 @@
 package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 
 @Entity
 public class FlatAmenities {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int flatId;
+    private int flatAmenitiesId;
+
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     public FlatAmenities() {
     }
 
-    public FlatAmenities(int flatId, String name, LocalDateTime createdAt) {
-        this.flatId = flatId;
+    public FlatAmenities(int flatAmenitiesId, String name) {
+        this.flatAmenitiesId = flatAmenitiesId;
         this.name = name;
-        this.createdAt = createdAt;
     }
 
-    public int getFlatId() {
-        return flatId;
+    public int getFlatAmenitiesId() {
+        return flatAmenitiesId;
     }
 
-    public void setFlatId(int flatId) {
-        this.flatId = flatId;
+    public void setFlatAmenitiesId(int flatAmenitiesId) {
+        this.flatAmenitiesId = flatAmenitiesId;
     }
 
     public String getName() {
@@ -37,13 +34,5 @@ public class FlatAmenities {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

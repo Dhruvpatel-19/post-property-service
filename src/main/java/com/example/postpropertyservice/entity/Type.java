@@ -1,7 +1,6 @@
 package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 public class Type {
@@ -12,16 +11,12 @@ public class Type {
     @Column(nullable = false)
     private String type;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     public Type() {
     }
 
-    public Type(int typeId, String type, LocalDateTime createdAt) {
+    public Type(int typeId, String type) {
         this.typeId = typeId;
         this.type = type;
-        this.createdAt = createdAt;
     }
 
     public int getTypeId() {
@@ -40,11 +35,4 @@ public class Type {
         this.type = type;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
