@@ -1,6 +1,7 @@
 package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 
 @Entity
@@ -79,4 +80,17 @@ public class Address {
         this.postCode = postCode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return postCode == address.postCode && streetLine.equals(address.streetLine) && Objects.equals(additionalStreet, address.additionalStreet) && city.equals(address.city) && state.equals(address.state);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(streetLine, additionalStreet, city, state, postCode);
+    }
 }
+

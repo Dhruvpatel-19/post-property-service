@@ -15,7 +15,7 @@ public class Favourites {
     private LocalDateTime createdAt;
 
     @ManyToMany(targetEntity = Property.class , cascade = CascadeType.ALL)
-    @JoinTable( name = "favourite_property" , joinColumns = { @JoinColumn(name = "favId" , nullable = false) } ,  inverseJoinColumns = { @JoinColumn(name = "propertyId" , nullable = false) }  )
+    @JoinTable( name = "favourite_property" , joinColumns = { @JoinColumn(name = "favId") } ,  inverseJoinColumns = { @JoinColumn(name = "propertyId") } )
     private List<Property> properties;
 
     public Favourites() {

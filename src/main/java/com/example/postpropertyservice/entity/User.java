@@ -30,7 +30,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @OneToMany(targetEntity = Favourites.class , cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId" , nullable = false)
+    @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId")
     private List<Favourites> favourites;
 
 

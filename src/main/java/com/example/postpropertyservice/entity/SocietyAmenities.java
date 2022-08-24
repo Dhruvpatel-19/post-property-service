@@ -1,6 +1,7 @@
 package com.example.postpropertyservice.entity;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 
 @Entity
@@ -34,4 +35,18 @@ public class SocietyAmenities {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SocietyAmenities that = (SocietyAmenities) o;
+        return name.equals(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }
+

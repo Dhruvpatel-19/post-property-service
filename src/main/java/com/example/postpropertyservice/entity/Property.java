@@ -13,6 +13,9 @@ public class Property {
     private int propertyId;
 
     @Column(nullable = false)
+    private String propertyName;
+
+    @Column(nullable = false)
     private String price;
 
     @Column(nullable = false)
@@ -41,12 +44,12 @@ public class Property {
     @JoinColumn(name="property_id_fk" , referencedColumnName = "propertyId" , nullable = false)
     private List<Image> images;
 
-    @OneToMany(targetEntity = SocietyAmenities.class , cascade = CascadeType.ALL)
-    @JoinColumn(name="property_id_fk",referencedColumnName = "propertyId" , nullable = false)
+    @ManyToMany(targetEntity = SocietyAmenities.class)
+    @JoinTable(name = "property_society_amenities" , joinColumns = @JoinColumn(name = "property_id")  , inverseJoinColumns = @JoinColumn(name = "society_amenities_id") )
     private List<SocietyAmenities> societyAmenities;
 
-    @OneToMany(targetEntity = FlatAmenities.class , cascade = CascadeType.ALL)
-    @JoinColumn(name="property_id_fk",referencedColumnName = "propertyId" , nullable = false)
+    @ManyToMany( targetEntity = FlatAmenities.class)
+    @JoinTable( name = "property_flat_amenities" , joinColumns = @JoinColumn(name = "property_id") , inverseJoinColumns = @JoinColumn(name="flat_amenities_id"))
     private List<FlatAmenities> flatAmenities;
 
     @OneToOne(targetEntity = Category.class)
@@ -64,10 +67,10 @@ public class Property {
     public Property() {
     }
 
-    public Property(int propertyId, String price, List<Image> images, String area, int action, int ageYears, String furnishing, Date availableFrom, Date availableTo, String parkingAvailability, LocalDateTime createdAt, List<SocietyAmenities> societyAmenities, List<FlatAmenities> flatAmenities, Category category, Type type, Address address) {
+    public Property(int propertyId, String propertyName, String price, String area, int action, int ageYears, String furnishing, Date availableFrom, Date availableTo, String parkingAvailability, LocalDateTime createdAt, List<Image> images, List<SocietyAmenities> societyAmenities, List<FlatAmenities> flatAmenities, Category category, Type type, Address address) {
         this.propertyId = propertyId;
+        this.propertyName = propertyName;
         this.price = price;
-        this.images = images;
         this.area = area;
         this.action = action;
         this.ageYears = ageYears;
@@ -76,6 +79,7 @@ public class Property {
         this.availableTo = availableTo;
         this.parkingAvailability = parkingAvailability;
         this.createdAt = createdAt;
+        this.images = images;
         this.societyAmenities = societyAmenities;
         this.flatAmenities = flatAmenities;
         this.category = category;
@@ -83,12 +87,21 @@ public class Property {
         this.address = address;
     }
 
+
     public int getPropertyId() {
         return propertyId;
     }
 
     public void setPropertyId(int propertyId) {
         this.propertyId = propertyId;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
+    }
+
+    public void setPropertyName(String propertyName) {
+        this.propertyName = propertyName;
     }
 
     public String getPrice() {

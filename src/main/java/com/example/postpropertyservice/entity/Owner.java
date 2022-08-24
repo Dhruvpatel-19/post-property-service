@@ -24,7 +24,7 @@ public class Owner {
     private LocalDateTime createdAt;
 
     @OneToMany(targetEntity = Property.class , cascade = CascadeType.ALL)
-    @JoinColumn(name="owner_id_fk",referencedColumnName = "ownerId" , nullable = false)
+    @JoinColumn(name="owner_id_fk",referencedColumnName = "ownerId")
     private List<Property> properties;
 
 
