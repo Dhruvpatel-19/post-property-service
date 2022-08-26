@@ -1,9 +1,18 @@
 package com.example.postpropertyservice.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Image {
 
     @Id
@@ -12,30 +21,6 @@ public class Image {
 
     @Column(nullable = false)
     String image;
-
-    public Image() {
-    }
-
-    public Image(int imageId, String image) {
-        this.imageId = imageId;
-        this.image = image;
-    }
-
-    public int getImageId() {
-        return imageId;
-    }
-
-    public void setImageId(int imageId) {
-        this.imageId = imageId;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
 
     @Override
     public boolean equals(Object o) {

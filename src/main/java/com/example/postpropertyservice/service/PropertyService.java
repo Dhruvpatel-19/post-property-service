@@ -3,13 +3,15 @@ package com.example.postpropertyservice.service;
 import com.example.postpropertyservice.entity.*;
 import com.example.postpropertyservice.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -36,10 +38,14 @@ public class PropertyService {
     @Autowired
     private ImageRepository imageRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
 
     public Property addProperty(Property property){
 
         property.setCreatedAt(LocalDateTime.now());
+        property.setSold(false);
 
         Category category = property.getCategory();
         boolean categoryExists = categoryRepository.existsByCategory(category.getCategory());
@@ -94,6 +100,8 @@ public class PropertyService {
         }
         property.setSocietyAmenities(societyAmenitiesListNew);
 
+        HttpEntity<Property> propertyObj = new HttpEntity<>(property);
+        restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
 
         return propertyRepository.save(property);
     }
@@ -124,7 +132,7 @@ public class PropertyService {
         property.setAvailableFrom(updatedProperty.getAvailableFrom());
         property.setAvailableTo(updatedProperty.getAvailableTo());
         property.setParkingAvailability(updatedProperty.getParkingAvailability());
-
+        property.setSold(updatedProperty.isSold());
 
         if(!compareListsImages(property.getImages() , updatedProperty.getImages())  ) {
             imageRepository.deleteAllInBatch(property.getImages());
@@ -207,18 +215,27 @@ public class PropertyService {
             }
         }
 
+        HttpEntity<Property> propertyObj = new HttpEntity<>(property);
+        //restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
+        restTemplate.exchange("http://localhost:8081/callGuestService/updateProperty/"+id , HttpMethod.PUT , propertyObj , String.class);
+
         return propertyRepository.save(property);
     }
 
     public String deleteProperty(int id){
         boolean isExist = propertyRepository.existsById(id);
 
+        //restTemplate.exchange("http://localhost:8081/callGuestService/deleteProperty/"+id , HttpMethod.DELETE , null , String.class);
+
         if(isExist) {
+            Property property = propertyRepository.findById(id).orElse(null);
+            restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
             propertyRepository.deleteById(id);
-            return "Property deleted successfully";
+            return "Property with name " +property.getPropertyName()+" deleted successfully";
         }else {
             return "Property doesn't exist";
         }
+
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){

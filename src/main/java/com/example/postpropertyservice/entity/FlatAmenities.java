@@ -1,10 +1,19 @@
 package com.example.postpropertyservice.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class FlatAmenities {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,30 +21,6 @@ public class FlatAmenities {
 
     @Column(nullable = false)
     private String name;
-
-    public FlatAmenities() {
-    }
-
-    public FlatAmenities(int flatAmenitiesId, String name) {
-        this.flatAmenitiesId = flatAmenitiesId;
-        this.name = name;
-    }
-
-    public int getFlatAmenitiesId() {
-        return flatAmenitiesId;
-    }
-
-    public void setFlatAmenitiesId(int flatAmenitiesId) {
-        this.flatAmenitiesId = flatAmenitiesId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -5,7 +5,10 @@ package com.example.postpropertyservice.service;
 import com.example.postpropertyservice.entity.Category;
 import com.example.postpropertyservice.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -15,7 +18,12 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     public Category addCategory(Category category){
+        HttpEntity<Category> categoryObj = new HttpEntity<>(category);
+        restTemplate.postForEntity("http://localhost:8081/callGuestService/addCategory" , categoryObj , String.class);
         return categoryRepository.save(category);
     }
 
@@ -36,6 +44,9 @@ public class CategoryService {
 
         category.setCategory(updatedCategory.getCategory());
 
+        HttpEntity<Category> categoryObj = new HttpEntity<>(category);
+        restTemplate.exchange("http://localhost:8081/callGuestService/updateCategory/"+id , HttpMethod.PUT , categoryObj , String.class);
+
         return categoryRepository.save(category);
     }
 
@@ -46,6 +57,7 @@ public class CategoryService {
         if(isExist){
             Category category = categoryRepository.findById(id).orElse(null);
             categoryRepository.deleteById(id);
+            restTemplate.delete("http://localhost:8081/callGuestService/deleteCategory/"+id);
             return "Category with name "+category.getCategory()+" deleted successfully";
         }
         else{

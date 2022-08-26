@@ -3,7 +3,10 @@ package com.example.postpropertyservice.service;
 import com.example.postpropertyservice.entity.FlatAmenities;
 import com.example.postpropertyservice.repository.FlatAmenitiesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -13,7 +16,12 @@ public class FlatAmenitiesService {
     @Autowired
     private FlatAmenitiesRepository flatAmenitiesRepository;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     public FlatAmenities addFlatAmenities(FlatAmenities flatAmenities){
+        HttpEntity<FlatAmenities> flatAmenitiesObj = new HttpEntity<>(flatAmenities);
+        restTemplate.postForEntity("http://localhost:8081/callGuestService/addFlatAmenities" , flatAmenitiesObj , String.class);
         return flatAmenitiesRepository.save(flatAmenities);
     }
 
@@ -33,6 +41,9 @@ public class FlatAmenitiesService {
 
         flatAmenities.setName(updatedFlatAmenities.getName());
 
+        HttpEntity<FlatAmenities> flatAmenitiesObj = new HttpEntity<>(flatAmenities);
+        restTemplate.exchange("http://localhost:8081/callGuestService/updateFlatAmenities/"+id , HttpMethod.PUT , flatAmenitiesObj , String.class);
+
         flatAmenitiesRepository.save(flatAmenities);
 
         return flatAmenities;
@@ -44,6 +55,8 @@ public class FlatAmenitiesService {
         }
 
         FlatAmenities flatAmenities = flatAmenitiesRepository.findById(id).orElse(null);
+
+        restTemplate.delete("http://localhost:8081/callGuestService/deleteFlatAmenities/"+id);
 
         flatAmenitiesRepository.deleteById(id);
 

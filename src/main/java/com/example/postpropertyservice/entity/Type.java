@@ -1,9 +1,18 @@
 package com.example.postpropertyservice.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Type {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,30 +20,6 @@ public class Type {
 
     @Column(nullable = false)
     private String type;
-
-    public Type() {
-    }
-
-    public Type(int typeId, String type) {
-        this.typeId = typeId;
-        this.type = type;
-    }
-
-    public int getTypeId() {
-        return typeId;
-    }
-
-    public void setTypeId(int typeId) {
-        this.typeId = typeId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     @Override
     public boolean equals(Object o) {

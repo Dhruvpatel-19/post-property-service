@@ -1,40 +1,25 @@
 package com.example.postpropertyservice.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int categoryId;
     @Column(nullable = false)
     private String category;
-
-    public Category() {
-    }
-
-    public Category(int categoryId, String category) {
-        this.categoryId = categoryId;
-        this.category = category;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(int categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 
     @Override
     public boolean equals(Object o) {
