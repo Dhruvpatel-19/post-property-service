@@ -32,7 +32,7 @@ public class Owner {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(targetEntity = Property.class , cascade = CascadeType.ALL)
+    @OneToMany(targetEntity = Property.class)
     @JoinColumn(name="owner_id_fk",referencedColumnName = "ownerId")
     private List<Property> properties;
 

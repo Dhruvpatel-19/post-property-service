@@ -5,6 +5,8 @@ import com.example.postpropertyservice.service.PropertyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/postService/")
 public class PropertyController {
@@ -13,18 +15,19 @@ public class PropertyController {
     private PropertyService propertyService;
 
     @PostMapping(value = "/addProperty")
-    public Property addProperty(@RequestBody Property property){
-        return propertyService.addProperty(property);
+    public String addProperty(HttpServletRequest request, @RequestBody Property property) throws Exception {
+         return propertyService.addProperty(request , property);
     }
 
     @PutMapping(value = "/updateProperty/{id}")
-    public Property updateProperty(@PathVariable("id") int id , @RequestBody Property updatedProperty){
-       return propertyService.updateProperty(id , updatedProperty);
+    public String updateProperty(HttpServletRequest request, @PathVariable("id") int id , @RequestBody Property updatedProperty) throws Exception {
+       //return propertyService.updateProperty(request , id , updatedProperty);
+        return propertyService.updateProperty(request , id , updatedProperty);
     }
 
     @DeleteMapping(value = "/deleteProperty/{id}")
-    public String deleteProperty(@PathVariable("id") int id){
-        return propertyService.deleteProperty(id);
+    public String deleteProperty(HttpServletRequest request, @PathVariable("id") int id) throws Exception {
+        return propertyService.deleteProperty(request, id);
     }
 
 

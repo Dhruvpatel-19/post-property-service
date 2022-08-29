@@ -1,6 +1,7 @@
 package com.example.postpropertyservice.service;
 
 import com.example.postpropertyservice.entity.*;
+import com.example.postpropertyservice.jwt.JwtUtil;
 import com.example.postpropertyservice.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,10 +41,15 @@ public class PropertyService {
     private ImageRepository imageRepository;
 
     @Autowired
+    private OwnerRepository ownerRepository;
+
+    @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public Property addProperty(Property property){
+    public String addProperty(HttpServletRequest request, Property property) throws Exception {
 
         property.setCreatedAt(LocalDateTime.now());
         property.setSold(false);
@@ -100,10 +107,32 @@ public class PropertyService {
         }
         property.setSocietyAmenities(societyAmenitiesListNew);
 
-        HttpEntity<Property> propertyObj = new HttpEntity<>(property);
-        restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
+        String requestHeader = request.getHeader("Authorization");
+        String jwtToken = null;
+        String email = null;
 
-        return propertyRepository.save(property);
+        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
+            jwtToken = requestHeader.substring(7);
+
+            try{
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (Exception e){
+                throw new Exception("Owner not found exception");
+            }
+
+            HttpEntity<Property> propertyObj = new HttpEntity<>(property);
+            restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
+            propertyRepository.save(property);
+
+            Owner owner = ownerRepository.findByEmail(email);
+            List<Property> propertyList = owner.getProperties();
+            propertyList.add(property);
+            owner.setProperties(propertyList);
+            ownerRepository.save(owner);
+            return "Property added successfully";
+        }
+
+        return "Some error occured for addProperty ";
     }
 
     public Property getProperty(int id){
@@ -114,15 +143,47 @@ public class PropertyService {
         return propertyRepository.findAll();
     }
 
-    public Property updateProperty(int id , Property updatedProperty){
+    public String updateProperty(HttpServletRequest request, int id , Property updatedProperty) throws Exception {
 
         boolean propertyExists = propertyRepository.existsById(id);
         if(!propertyExists){
-            return null;
+            return "Property doesn't exists";
         }
 
         Property property = propertyRepository.findById(id).orElse(null);
 
+        String requestHeader = request.getHeader("Authorization");
+        String jwtToken = null;
+        String email = null;
+        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
+            jwtToken = requestHeader.substring(7);
+            try{
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (Exception e){
+                throw new Exception("Owner not found exception");
+            }
+            Owner owner = ownerRepository.findByEmail(email);
+            List<Property> propertyList = owner.getProperties();
+            boolean isOwned = false;
+
+            for(int i=0 ; i<propertyList.size() ; i++){
+                if(propertyList.get(i) == property){
+                    isOwned = true;
+                    break;
+                }
+            }
+
+            if (isOwned)
+                return updateProperty(id , property , updatedProperty);
+            else
+                return "Property is owned by another owner";
+        }
+        else {
+            return "Some errror occured for updateProperty";
+        }
+    }
+
+    private String updateProperty(int id ,  Property property , Property updatedProperty){
         property.setPrice(updatedProperty.getPrice());
         property.setPropertyName(updatedProperty.getPropertyName());
         property.setArea(updatedProperty.getArea());
@@ -219,23 +280,52 @@ public class PropertyService {
         //restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
         restTemplate.exchange("http://localhost:8081/callGuestService/updateProperty/"+id , HttpMethod.PUT , propertyObj , String.class);
 
-        return propertyRepository.save(property);
+        propertyRepository.save(property);
+        return "Property updated successfully";
     }
 
-    public String deleteProperty(int id){
+    public String deleteProperty(HttpServletRequest request,int id) throws Exception {
         boolean isExist = propertyRepository.existsById(id);
 
-        //restTemplate.exchange("http://localhost:8081/callGuestService/deleteProperty/"+id , HttpMethod.DELETE , null , String.class);
-
-        if(isExist) {
-            Property property = propertyRepository.findById(id).orElse(null);
-            restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
-            propertyRepository.deleteById(id);
-            return "Property with name " +property.getPropertyName()+" deleted successfully";
-        }else {
+        if(!isExist)
             return "Property doesn't exist";
-        }
 
+        Property property = propertyRepository.findById(id).orElse(null);
+
+        String requestHeader = request.getHeader("Authorization");
+        String jwtToken = null;
+        String email = null;
+
+        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
+            jwtToken = requestHeader.substring(7);
+            try{
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (Exception e){
+                throw new Exception("Owner not found exception");
+            }
+            Owner owner = ownerRepository.findByEmail(email);
+            List<Property> propertyList = owner.getProperties();
+            boolean isOwned = false;
+
+            for(int i=0 ; i<propertyList.size() ; i++){
+                if(propertyList.get(i) == property)
+                {
+                    isOwned = true;
+                    break;
+                }
+            }
+
+            if(isOwned){
+                restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
+                propertyRepository.deleteById(id);
+                return "Property with name " +property.getPropertyName()+" deleted successfully";
+            }
+            else
+                return "Property is owned by another Owner";
+
+        }
+        else
+            return "Some error occured for deleteProperty";
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){

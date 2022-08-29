@@ -7,7 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -25,5 +25,5 @@ public class Favourites {
 
     @ManyToMany(targetEntity = Property.class)
     @JoinTable(name = "favId_propertyId" , joinColumns = @JoinColumn(name = "favId") , inverseJoinColumns = @JoinColumn(name = "propertyId") )
-    private List<Property> propertyList;
+    private Set<Property> propertyList;
 }
