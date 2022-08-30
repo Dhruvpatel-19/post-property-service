@@ -23,4 +23,9 @@ public class OwnerController {
     public List<Owner> findAllOwner(){
         return ownerService.findAllOwner();
     }
+
+    @PutMapping(value = "/update/{id}")
+    public void updateOwner(@PathVariable("id") int id ,@RequestBody Owner updatedOwner){
+        ownerService.updateOwner(id , updatedOwner);
+    }
 }

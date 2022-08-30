@@ -20,4 +20,14 @@ public class OwnerService{
     public List<Owner> findAllOwner(){
         return ownerRepository.findAll();
     }
+
+    public void updateOwner(int id , Owner updatedOwner){
+        Owner owner = ownerRepository.findById(id).orElse(null);
+
+        owner.setFirstName(updatedOwner.getFirstName());
+        owner.setLastName(updatedOwner.getLastName());
+        owner.setMobileNumber(updatedOwner.getMobileNumber());
+
+        ownerRepository.save(owner);
+    }
 }
