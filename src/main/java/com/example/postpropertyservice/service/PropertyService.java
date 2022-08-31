@@ -139,8 +139,34 @@ public class PropertyService {
         return propertyRepository.findById(id).orElse(null);
     }
 
-    public List<Property> getAllProperty(){
-        return propertyRepository.findAll();
+    public List<Property> getAllProperty(HttpServletRequest request) throws Exception {
+        String requestTokenHeader = request.getHeader("Authorization");
+        String jwtToken = null;
+        String email = null;
+
+        if(requestTokenHeader!=null && requestTokenHeader.startsWith("Bearer")){
+            jwtToken = requestTokenHeader.substring(7);
+            try {
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (Exception e){
+                throw new Exception("User not found");
+            }
+            Owner owner = ownerRepository.findByEmail(email);
+
+            return owner.getProperties();
+        }
+
+        return null;
+    }
+
+    public List<Property> getAllUnsoldProperty(HttpServletRequest request) throws Exception {
+        List<Property> propertyList = getAllProperty(request);
+        List<Property> unsoldPropertyList = null;
+        for(Property property : propertyList){
+            if(property.isSold() == false)
+                unsoldPropertyList.add(property);
+        }
+        return unsoldPropertyList;
     }
 
     public String updateProperty(HttpServletRequest request, int id , Property updatedProperty) throws Exception {
