@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -42,6 +43,9 @@ public class PropertyService {
 
     @Autowired
     private OwnerRepository ownerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -342,6 +346,10 @@ public class PropertyService {
             }
 
             if(isOwned){
+                List<User> users = userRepository.findAll();
+                for(User user : users){
+                    removeFromFavourite(user , property);
+                }
                 restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
                 propertyRepository.deleteById(id);
                 return "Property with name " +property.getPropertyName()+" deleted successfully";
@@ -352,6 +360,19 @@ public class PropertyService {
         }
         else
             return "Some error occured for deleteProperty";
+    }
+
+    private void removeFromFavourite(User user , Property property){
+
+        Favourites favourites = user.getFavourites();
+        Set<Property> propertySet = favourites.getPropertyList();
+
+        propertySet.remove(property);
+
+        favourites.setPropertyList(propertySet);
+        user.setFavourites(favourites);
+
+        userRepository.save(user);
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){
