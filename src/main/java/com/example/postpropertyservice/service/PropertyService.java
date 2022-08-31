@@ -48,6 +48,9 @@ public class PropertyService {
     private UserRepository userRepository;
 
     @Autowired
+    private FavouritesRepository favouritesRepository;
+
+    @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
@@ -346,10 +349,7 @@ public class PropertyService {
             }
 
             if(isOwned){
-                List<User> users = userRepository.findAll();
-                for(User user : users){
-                    removeFromFavourite(user , property);
-                }
+                favouritesRepository.deleteByProperty(property);
                 restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
                 propertyRepository.deleteById(id);
                 return "Property with name " +property.getPropertyName()+" deleted successfully";
@@ -360,19 +360,6 @@ public class PropertyService {
         }
         else
             return "Some error occured for deleteProperty";
-    }
-
-    private void removeFromFavourite(User user , Property property){
-
-        Favourites favourites = user.getFavourites();
-        Set<Property> propertySet = favourites.getPropertyList();
-
-        propertySet.remove(property);
-
-        favourites.setPropertyList(propertySet);
-        user.setFavourites(favourites);
-
-        userRepository.save(user);
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){

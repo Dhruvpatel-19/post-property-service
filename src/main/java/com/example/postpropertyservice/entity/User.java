@@ -42,8 +42,7 @@ public class User {
     @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId")
     private List<Property> propertyList;
 
-    @OneToOne(targetEntity = Favourites.class , cascade = CascadeType.ALL)
-    @JoinColumn(name = "favourite_id_fk" , referencedColumnName = "favId")
-    private Favourites favourites;
+    @OneToMany(mappedBy = "user" , orphanRemoval = true)
+    private List<Favourites> favPropertyList;
 
 }

@@ -20,10 +20,14 @@ public class Favourites {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int favId;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    /*@Column(nullable = false)
+    private LocalDateTime createdAt;*/
 
-    @ManyToMany(targetEntity = Property.class)
-    @JoinTable(name = "favId_propertyId" , joinColumns = @JoinColumn(name = "favId") , inverseJoinColumns = @JoinColumn(name = "propertyId") )
-    private Set<Property> propertyList;
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name="user_id_fk" , referencedColumnName = "userId")
+    private User user;
+
+    @ManyToOne(targetEntity = Property.class)
+    @JoinColumn(name = "property_id_fk" , referencedColumnName = "propertyId")
+    private Property property;
 }
