@@ -287,8 +287,12 @@ public class PropertyService {
         if(!isExist)
             return "Property doesn't exist";
 
-        Owner owner = (Owner) getOwnerOrUser(request);
         Property property = propertyRepository.findById(id).orElse(null);
+
+        if(property.isSold())
+            return "Property is sold to other";
+
+        Owner owner = (Owner) getOwnerOrUser(request);
 
         if(owner!=null){
             List<Property> propertyList = owner.getProperties();
