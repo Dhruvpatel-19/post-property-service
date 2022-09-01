@@ -32,7 +32,6 @@ public class PropertyController {
 
     @PutMapping(value = "/updateProperty/{id}")
     public String updateProperty(HttpServletRequest request, @PathVariable("id") int id , @RequestBody Property updatedProperty) throws Exception {
-       //return propertyService.updateProperty(request , id , updatedProperty);
         return propertyService.updateProperty(request , id , updatedProperty);
     }
 

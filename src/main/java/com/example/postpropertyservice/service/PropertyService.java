@@ -114,31 +114,17 @@ public class PropertyService {
         }
         property.setSocietyAmenities(societyAmenitiesListNew);
 
-        String requestHeader = request.getHeader("Authorization");
-        String jwtToken = null;
-        String email = null;
-
-        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
-            jwtToken = requestHeader.substring(7);
-
-            try{
-                email = jwtUtil.extractUsername(jwtToken);
-            }catch (Exception e){
-                throw new Exception("Owner not found exception");
-            }
-
+        Owner owner = (Owner) getOwnerOrUser(request);
+        if(owner!=null){
             HttpEntity<Property> propertyObj = new HttpEntity<>(property);
             restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
             propertyRepository.save(property);
-
-            Owner owner = ownerRepository.findByEmail(email);
             List<Property> propertyList = owner.getProperties();
             propertyList.add(property);
             owner.setProperties(propertyList);
             ownerRepository.save(owner);
             return "Property added successfully";
         }
-
         return "Some error occured for addProperty ";
     }
 
@@ -147,30 +133,18 @@ public class PropertyService {
     }
 
     public List<Property> getAllProperty(HttpServletRequest request) throws Exception {
-        String requestTokenHeader = request.getHeader("Authorization");
-        String jwtToken = null;
-        String email = null;
-
-        if(requestTokenHeader!=null && requestTokenHeader.startsWith("Bearer")){
-            jwtToken = requestTokenHeader.substring(7);
-            try {
-                email = jwtUtil.extractUsername(jwtToken);
-            }catch (Exception e){
-                throw new Exception("User not found");
-            }
-            Owner owner = ownerRepository.findByEmail(email);
-
+        Owner owner = (Owner) getOwnerOrUser(request);
+        if(owner!=null){
             return owner.getProperties();
         }
-
         return null;
     }
 
     public List<Property> getAllUnsoldProperty(HttpServletRequest request) throws Exception {
         List<Property> propertyList = getAllProperty(request);
-        List<Property> unsoldPropertyList = null;
+        List<Property> unsoldPropertyList = new ArrayList<>();
         for(Property property : propertyList){
-            if(property.isSold() == false)
+            if(!property.isSold())
                 unsoldPropertyList.add(property);
         }
         return unsoldPropertyList;
@@ -183,24 +157,14 @@ public class PropertyService {
             return "Property doesn't exists";
         }
 
+        Owner owner = (Owner) getOwnerOrUser(request);
         Property property = propertyRepository.findById(id).orElse(null);
-
-        String requestHeader = request.getHeader("Authorization");
-        String jwtToken = null;
-        String email = null;
-        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
-            jwtToken = requestHeader.substring(7);
-            try{
-                email = jwtUtil.extractUsername(jwtToken);
-            }catch (Exception e){
-                throw new Exception("Owner not found exception");
-            }
-            Owner owner = ownerRepository.findByEmail(email);
+        if (owner!=null){
             List<Property> propertyList = owner.getProperties();
             boolean isOwned = false;
 
-            for(int i=0 ; i<propertyList.size() ; i++){
-                if(propertyList.get(i) == property){
+            for (Property value : propertyList) {
+                if (value == property) {
                     isOwned = true;
                     break;
                 }
@@ -323,20 +287,10 @@ public class PropertyService {
         if(!isExist)
             return "Property doesn't exist";
 
+        Owner owner = (Owner) getOwnerOrUser(request);
         Property property = propertyRepository.findById(id).orElse(null);
 
-        String requestHeader = request.getHeader("Authorization");
-        String jwtToken = null;
-        String email = null;
-
-        if(requestHeader!=null && requestHeader.startsWith("Bearer ")){
-            jwtToken = requestHeader.substring(7);
-            try{
-                email = jwtUtil.extractUsername(jwtToken);
-            }catch (Exception e){
-                throw new Exception("Owner not found exception");
-            }
-            Owner owner = ownerRepository.findByEmail(email);
+        if(owner!=null){
             List<Property> propertyList = owner.getProperties();
             boolean isOwned = false;
 
@@ -356,10 +310,9 @@ public class PropertyService {
             }
             else
                 return "Property is owned by another Owner";
-
         }
-        else
-            return "Some error occured for deleteProperty";
+
+        return "Some error occured for deleteProperty";
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){
@@ -395,6 +348,28 @@ public class PropertyService {
         }
 
         return true;
+    }
+    private Object getOwnerOrUser(HttpServletRequest request) throws Exception {
+        String requestTokenHeader = request.getHeader("Authorization");
+        String jwtToken = null;
+        String email = null;
+
+        if(requestTokenHeader!=null && requestTokenHeader.startsWith("Bearer ")){
+            jwtToken = requestTokenHeader.substring(7);
+            try {
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (Exception e){
+                throw new Exception("User not found");
+            }
+
+            User user = userRepository.findByEmail(email);
+            Owner owner = ownerRepository.findByEmail(email);
+            if(user!=null)
+                return user;
+            else
+                return owner;
+        }
+        return null;
     }
 
 }
