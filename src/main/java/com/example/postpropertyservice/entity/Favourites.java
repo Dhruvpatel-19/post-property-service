@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.Set;
 
 
 @Entity
@@ -19,9 +17,6 @@ public class Favourites {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int favId;
-
-    /*@Column(nullable = false)
-    private LocalDateTime createdAt;*/
 
     @ManyToOne(targetEntity = User.class)
     @JoinColumn(name="user_id_fk" , referencedColumnName = "userId")

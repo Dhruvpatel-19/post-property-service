@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 
 @Service
 @Transactional
@@ -116,13 +116,19 @@ public class PropertyService {
 
         Owner owner = (Owner) getOwnerOrUser(request);
         if(owner!=null){
+
             HttpEntity<Property> propertyObj = new HttpEntity<>(property);
             restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
-            propertyRepository.save(property);
+
             List<Property> propertyList = owner.getProperties();
             propertyList.add(property);
             owner.setProperties(propertyList);
             ownerRepository.save(owner);
+
+            property.setOwner(owner);
+            propertyRepository.save(property);
+
+
             return "Property added successfully";
         }
         return "Some error occured for addProperty ";
@@ -158,19 +164,12 @@ public class PropertyService {
         }
 
         Owner owner = (Owner) getOwnerOrUser(request);
+
         Property property = propertyRepository.findById(id).orElse(null);
-        if (owner!=null){
-            List<Property> propertyList = owner.getProperties();
-            boolean isOwned = false;
 
-            for (Property value : propertyList) {
-                if (value == property) {
-                    isOwned = true;
-                    break;
-                }
-            }
+        if (owner!=null && property!=null){
 
-            if (isOwned)
+            if (owner.getEmail().equals(property.getOwner().getEmail()))
                 return updateProperty(id , property , updatedProperty);
             else
                 return "Property is owned by another owner";
@@ -289,24 +288,14 @@ public class PropertyService {
 
         Property property = propertyRepository.findById(id).orElse(null);
 
+        assert property != null;
         if(property.isSold())
             return "Property is sold to other";
 
         Owner owner = (Owner) getOwnerOrUser(request);
 
         if(owner!=null){
-            List<Property> propertyList = owner.getProperties();
-            boolean isOwned = false;
-
-            for(int i=0 ; i<propertyList.size() ; i++){
-                if(propertyList.get(i) == property)
-                {
-                    isOwned = true;
-                    break;
-                }
-            }
-
-            if(isOwned){
+            if(owner.getEmail().equals(property.getOwner().getEmail())){
                 favouritesRepository.deleteByProperty(property);
                 restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
                 propertyRepository.deleteById(id);

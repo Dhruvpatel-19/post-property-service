@@ -77,4 +77,13 @@ public class Property {
     @JoinColumn(name = "address_id_fk" , referencedColumnName = "addressId" , nullable = false)
     private Address address;
 
+    @ManyToOne(targetEntity = Owner.class)
+    @JoinColumn(name="owner_id_fk",referencedColumnName = "ownerId")
+    @JsonIgnore
+    private Owner owner;
+
+    @ManyToOne(targetEntity = User.class)
+    @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId")
+    @JsonIgnore
+    private User user;
 }

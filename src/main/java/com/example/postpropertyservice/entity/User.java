@@ -38,8 +38,7 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @OneToMany(targetEntity = Property.class)
-    @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId")
+    @OneToMany(mappedBy = "user" , orphanRemoval = true)
     private List<Property> propertyList;
 
     @OneToMany(mappedBy = "user" , orphanRemoval = true)
