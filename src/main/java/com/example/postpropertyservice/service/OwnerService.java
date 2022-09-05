@@ -23,13 +23,13 @@ public class OwnerService{
         return ownerRepository.findAll();
     }
 
-    public void updateOwner(int id , Owner updatedOwner){
+    public Owner updateOwner(int id , Owner updatedOwner){
         Owner owner = ownerRepository.findById(id).orElse(null);
 
         owner.setFirstName(updatedOwner.getFirstName());
         owner.setLastName(updatedOwner.getLastName());
         owner.setMobileNumber(updatedOwner.getMobileNumber());
 
-        ownerRepository.save(owner);
+        return ownerRepository.save(owner);
     }
 }
