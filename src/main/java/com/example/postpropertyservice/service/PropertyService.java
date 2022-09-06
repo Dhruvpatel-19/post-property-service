@@ -1,12 +1,16 @@
 package com.example.postpropertyservice.service;
 
+import com.example.postpropertyservice.dto.AllPropertyDTO;
+import com.example.postpropertyservice.dto.PropertyDTO;
 import com.example.postpropertyservice.entity.*;
 import com.example.postpropertyservice.exception.*;
 import com.example.postpropertyservice.jwt.JwtUtil;
+import com.example.postpropertyservice.mapstruct.MapStructMapper;
 import com.example.postpropertyservice.repository.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -18,10 +22,12 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 @Transactional
+@Slf4j
 public class PropertyService {
 
     @Autowired
@@ -60,7 +66,10 @@ public class PropertyService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public Property addProperty(HttpServletRequest request, Property property){
+    @Autowired
+    private MapStructMapper mapStructMapper;
+
+    public PropertyDTO addProperty(HttpServletRequest request, Property property){
 
         property.setCreatedAt(LocalDateTime.now());
         property.setSold(false);
@@ -140,14 +149,25 @@ public class PropertyService {
         property.setOwner(owner);
         propertyRepository.save(property);
 
-        return property;
+        return mapStructMapper.propertyToPropertyDto(property);
     }
 
-    public Property getProperty(int id){
-        return propertyRepository.findById(id).orElse(null);
+    public PropertyDTO getProperty(int id){
+        Property property = propertyRepository.findById(id).orElse(null);
+        if(property == null)
+            throw new PropertyNotFoundException();
+
+        return mapStructMapper.propertyToPropertyDto(property);
     }
 
-    public List<Property> getAllProperty(HttpServletRequest request){
+    public List<AllPropertyDTO> getAllProperty(){
+            List<Property> propertyList = propertyRepository.findAll();
+            if(propertyList.isEmpty())
+                throw new PropertyNotFoundException();
+            return propertyList.stream().map(property -> mapStructMapper.propertyToAllPropertyDto(property)).collect(Collectors.toList());
+    }
+
+    public List<AllPropertyDTO> getAllOwnedProperty(HttpServletRequest request){
         Owner owner;
         try {
             owner = (Owner) getOwnerOrUser(request);
@@ -156,22 +176,22 @@ public class PropertyService {
         }
 
         if(owner!=null){
-            return owner.getProperties();
+            return owner.getProperties().stream().map(property -> mapStructMapper.propertyToAllPropertyDto(property)).collect(Collectors.toList());
         }
         return null;
     }
 
-    public List<Property> getAllUnsoldProperty(HttpServletRequest request){
-        List<Property> propertyList = getAllProperty(request);
-        List<Property> unsoldPropertyList = new ArrayList<>();
-        for(Property property : propertyList){
+    public List<AllPropertyDTO> getAllOwnedUnsoldProperty(HttpServletRequest request){
+        List<AllPropertyDTO> propertyList = getAllOwnedProperty(request);
+        List<AllPropertyDTO> unsoldPropertyList = new ArrayList<>();
+        for(AllPropertyDTO property : propertyList){
             if(!property.isSold())
                 unsoldPropertyList.add(property);
         }
         return unsoldPropertyList;
     }
 
-    public Property updateProperty(HttpServletRequest request, int id , Property updatedProperty){
+    public PropertyDTO updateProperty(HttpServletRequest request, int id , Property updatedProperty){
 
         if(!propertyRepository.existsById(id)){
            throw new PropertyNotFoundException();
@@ -201,7 +221,7 @@ public class PropertyService {
             throw new NotAuthenticatedOwner();
     }
 
-    private Property updateProperty(int id ,  Property property , Property updatedProperty){
+    private PropertyDTO updateProperty(int id ,  Property property , Property updatedProperty){
         property.setPrice(updatedProperty.getPrice());
         property.setPropertyName(updatedProperty.getPropertyName());
         property.setArea(updatedProperty.getArea());
@@ -298,10 +318,10 @@ public class PropertyService {
         //restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
         restTemplate.exchange("http://localhost:8081/callGuestService/updateProperty/"+id , HttpMethod.PUT , propertyObj , String.class);
 
-        return propertyRepository.save(property);
+        return mapStructMapper.propertyToPropertyDto(propertyRepository.save(property));
     }
 
-    public Property deleteProperty(HttpServletRequest request,int id){
+    public PropertyDTO deleteProperty(HttpServletRequest request,int id){
 
         Property property = propertyRepository.findById(id).orElse(null);
 
@@ -328,10 +348,47 @@ public class PropertyService {
             favouritesRepository.deleteByProperty(property);
             restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
             propertyRepository.deleteById(id);
-            return property;
+            return mapStructMapper.propertyToPropertyDto(property);
         }
         else
             throw new NotAuthenticatedOwner();
+    }
+
+    public PropertyDTO sellPropertyToUser(HttpServletRequest request , int propertyId , int userId){
+        Owner owner;
+
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e ){
+            owner = null;
+        }
+
+        if(owner == null)
+            throw new OwnerNotFoundException();
+
+        Property property = propertyRepository.findById(propertyId).orElse(null);
+        if(property == null)
+            throw new PropertyNotFoundException();
+
+        if(property.isSold())
+            throw new PropertyAlreadySold();
+
+        if(!owner.getEmail().equals(property.getOwner().getEmail()))
+            throw new NotAuthenticatedOwner();
+
+        User user = userRepository.findById(userId).orElse(null);
+        if(user==null)
+            throw new UserNotFoundException();
+
+        property.setUser(user);
+        property.setSold(true);
+        propertyRepository.save(property);
+
+        List<Property> propertyList = user.getPropertyList();
+        propertyList.add(property);
+        userRepository.save(user);
+
+        return mapStructMapper.propertyToPropertyDto(property);
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){
@@ -390,7 +447,7 @@ public class PropertyService {
             Owner owner = ownerRepository.findByEmail(email);
 
             if(user == null && owner==null)
-                throw new OwnerNotFoundException();
+                return null;
 
             if(user!=null)
                 return user;

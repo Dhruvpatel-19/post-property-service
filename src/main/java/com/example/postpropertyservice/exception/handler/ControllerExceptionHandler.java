@@ -20,6 +20,11 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>("Owner not found", HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = UserNotFoundException.class)
+    public ResponseEntity<Object> userNotFoundException(UserNotFoundException exception) {
+        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(value = NotAuthenticatedOwner.class)
     public ResponseEntity<Object> notAuthenticatedOwner(NotAuthenticatedOwner exception) {
         return new ResponseEntity<>("Property is owned by another user", HttpStatus.FORBIDDEN);
@@ -33,5 +38,10 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(value = JwtSignatureException.class)
     public ResponseEntity<Object> jwtSignatureException(JwtSignatureException exception) {
         return new ResponseEntity<>("Jwt token is not properly formatted", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = PropertyAlreadySold.class)
+    public ResponseEntity<Object> propertyAlreadySold(PropertyAlreadySold exception) {
+        return new ResponseEntity<>("Property has been sold already", HttpStatus.FORBIDDEN);
     }
 }

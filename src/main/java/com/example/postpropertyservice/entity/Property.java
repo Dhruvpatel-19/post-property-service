@@ -10,6 +10,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -20,7 +21,6 @@ import java.util.List;
 public class Property {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private int propertyId;
 
     @Column(nullable = false)
@@ -86,4 +86,9 @@ public class Property {
     @JoinColumn(name = "user_id_fk" , referencedColumnName = "userId")
     @JsonIgnore
     private User user;
+
+    @ManyToMany(targetEntity = User.class)
+    @JoinTable(name = "property_requser" , joinColumns = @JoinColumn(name = "property_id") , inverseJoinColumns = @JoinColumn(name="user_id"))
+    @JsonIgnore
+    private Set<User> reqUser;
 }
