@@ -1,11 +1,12 @@
 package com.example.postpropertyservice.service;
 
 import com.example.postpropertyservice.entity.*;
-import com.example.postpropertyservice.exception.NotAuthenticatedOwner;
-import com.example.postpropertyservice.exception.OwnerNotFoundException;
-import com.example.postpropertyservice.exception.PropertyNotFoundException;
+import com.example.postpropertyservice.exception.*;
 import com.example.postpropertyservice.jwt.JwtUtil;
 import com.example.postpropertyservice.repository.*;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -352,7 +353,15 @@ public class PropertyService {
         if(requestTokenHeader!=null && requestTokenHeader.startsWith("Bearer ")){
             jwtToken = requestTokenHeader.substring(7);
 
-            email = jwtUtil.extractUsername(jwtToken);
+            try{
+                email = jwtUtil.extractUsername(jwtToken);
+            }catch (ExpiredJwtException e){
+                throw new JwtTokenExpiredException();
+            }catch (SignatureException | MalformedJwtException e){
+                throw new JwtSignatureException();
+            } catch (Exception e){
+                return null;
+            }
 
             User user = userRepository.findByEmail(email);
             Owner owner = ownerRepository.findByEmail(email);
