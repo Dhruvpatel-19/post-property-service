@@ -118,10 +118,17 @@ public class PropertyService {
         }
         property.setSocietyAmenities(societyAmenitiesListNew);
 
-        Owner owner = (Owner) getOwnerOrUser(request);
+        Owner owner;
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e){
+            owner = null;
+        }
+
         if(owner == null){
             throw new OwnerNotFoundException();
         }
+
         HttpEntity<Property> propertyObj = new HttpEntity<>(property);
         restTemplate.postForEntity("http://localhost:8081/callGuestService/addProperty" , propertyObj , String.class);
 
@@ -141,7 +148,13 @@ public class PropertyService {
     }
 
     public List<Property> getAllProperty(HttpServletRequest request){
-        Owner owner = (Owner) getOwnerOrUser(request);
+        Owner owner;
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e){
+            owner = null;
+        }
+
         if(owner!=null){
             return owner.getProperties();
         }
@@ -164,7 +177,12 @@ public class PropertyService {
            throw new PropertyNotFoundException();
         }
 
-        Owner owner = (Owner) getOwnerOrUser(request);
+        Owner owner;
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e){
+            owner = null;
+        }
 
         if(owner == null)
         {
@@ -295,7 +313,12 @@ public class PropertyService {
             throw new NotAuthenticatedOwner();
         }
 
-        Owner owner = (Owner) getOwnerOrUser(request);
+        Owner owner;
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e){
+            owner = null;
+        }
 
         if(owner==null) {
             throw new OwnerNotFoundException();
