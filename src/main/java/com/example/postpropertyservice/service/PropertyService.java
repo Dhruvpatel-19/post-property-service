@@ -61,6 +61,9 @@ public class PropertyService {
     private FavouritesRepository favouritesRepository;
 
     @Autowired
+    private UserReqPropertyRepository userReqPropertyRepository;
+
+    @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
@@ -379,9 +382,7 @@ public class PropertyService {
         if(user==null)
             throw new UserNotFoundException();
 
-        Set<User> userSet = property.getReqUsers();
-
-        if(!userSet.contains(user))
+        if(!userReqPropertyRepository.existsByUserAndProperty(user , property))
             throw new UserNotRequestedPropertyException();
 
         property.setUser(user);
@@ -395,7 +396,7 @@ public class PropertyService {
         return mapStructMapper.propertyToPropertyDto(property);
     }
 
-    public Set<UserDTO> getAllReqOfProperty(HttpServletRequest request , int propertyId){
+    public List<UserDTO> getAllReqOfProperty(HttpServletRequest request , int propertyId){
         Property property = propertyRepository.findById(propertyId).orElse(null);
         if(property==null)
             throw new PropertyNotFoundException();
@@ -416,9 +417,12 @@ public class PropertyService {
         if(property.isSold())
             throw new PropertyAlreadySold();
 
-        Set<User> reqUsers = property.getReqUsers();
+        List<UserReqProperty> userReqPropertyList = userReqPropertyRepository.findByProperty(property);
+        List<User> userList = new ArrayList<>();
+        for(int i=0 ; i<userReqPropertyList.size() ; i++)
+            userList.add(userReqPropertyList.get(i).getUser());
 
-        return reqUsers.stream().map(user -> mapStructMapper.userToUserDto(user)).collect(Collectors.toSet());
+        return userList.stream().map(user -> mapStructMapper.userToUserDto(user)).collect(Collectors.toList());
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){

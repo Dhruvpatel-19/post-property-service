@@ -65,7 +65,7 @@ public class PropertyController {
 
     @Operation(summary = "Get A All Request For Property",description = "Users who hase made a request to buy property  will be displayed", tags = {"PropertyController"})
     @GetMapping(value = "/getPropertyReq/{propertyId}")
-    public Set<UserDTO> getAllReqOfProperty(HttpServletRequest request , @PathVariable("propertyId") int id){
+    public List<UserDTO> getAllReqOfProperty(HttpServletRequest request , @PathVariable("propertyId") int id){
         return propertyService.getAllReqOfProperty(request,id);
     }
 
