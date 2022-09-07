@@ -44,4 +44,9 @@ public class ControllerExceptionHandler {
     public ResponseEntity<Object> propertyAlreadySold(PropertyAlreadySold exception) {
         return new ResponseEntity<>("Property has been sold already", HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(value = UserNotRequestedPropertyException.class)
+    public ResponseEntity<Object> userNotRequestedPropertyException(UserNotRequestedPropertyException exception) {
+        return new ResponseEntity<>("User has not requested to buy property", HttpStatus.FORBIDDEN);
+    }
 }

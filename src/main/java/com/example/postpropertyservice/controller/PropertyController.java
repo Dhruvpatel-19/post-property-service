@@ -2,6 +2,7 @@ package com.example.postpropertyservice.controller;
 
 import com.example.postpropertyservice.dto.AllPropertyDTO;
 import com.example.postpropertyservice.dto.PropertyDTO;
+import com.example.postpropertyservice.dto.UserDTO;
 import com.example.postpropertyservice.entity.Property;
 import com.example.postpropertyservice.service.PropertyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 @RestController
 @RequestMapping("/postService/")
@@ -58,6 +61,11 @@ public class PropertyController {
     @DeleteMapping(value = "/deleteProperty/{id}")
     public PropertyDTO deleteProperty(HttpServletRequest request, @PathVariable("id") int id){
         return propertyService.deleteProperty(request, id);
+    }
+
+    @GetMapping(value = "/getPropertyReq/{propertyId}")
+    public Set<UserDTO> getAllReqOfProperty(HttpServletRequest request , @PathVariable("propertyId") int id){
+        return propertyService.getAllReqOfProperty(request,id);
     }
 
     @Operation(summary = "Sell Property To User",description = "Sell a property to specific user who has requested to buy property", tags = {"PropertyController"})

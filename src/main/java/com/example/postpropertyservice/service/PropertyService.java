@@ -2,6 +2,7 @@ package com.example.postpropertyservice.service;
 
 import com.example.postpropertyservice.dto.AllPropertyDTO;
 import com.example.postpropertyservice.dto.PropertyDTO;
+import com.example.postpropertyservice.dto.UserDTO;
 import com.example.postpropertyservice.entity.*;
 import com.example.postpropertyservice.exception.*;
 import com.example.postpropertyservice.jwt.JwtUtil;
@@ -20,8 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -365,7 +365,6 @@ public class PropertyService {
 
         if(owner == null)
             throw new OwnerNotFoundException();
-
         Property property = propertyRepository.findById(propertyId).orElse(null);
         if(property == null)
             throw new PropertyNotFoundException();
@@ -380,6 +379,11 @@ public class PropertyService {
         if(user==null)
             throw new UserNotFoundException();
 
+        Set<User> userSet = property.getReqUsers();
+
+        if(!userSet.contains(user))
+            throw new UserNotRequestedPropertyException();
+
         property.setUser(user);
         property.setSold(true);
         propertyRepository.save(property);
@@ -389,6 +393,32 @@ public class PropertyService {
         userRepository.save(user);
 
         return mapStructMapper.propertyToPropertyDto(property);
+    }
+
+    public Set<UserDTO> getAllReqOfProperty(HttpServletRequest request , int propertyId){
+        Property property = propertyRepository.findById(propertyId).orElse(null);
+        if(property==null)
+            throw new PropertyNotFoundException();
+
+        Owner owner;
+        try {
+            owner = (Owner) getOwnerOrUser(request);
+        }catch (Exception e){
+            owner = null;
+        }
+
+        if(owner==null)
+            throw new OwnerNotFoundException();
+
+        if(!owner.getEmail().equals(property.getOwner().getEmail()))
+            throw new NotAuthenticatedOwner();
+
+        if(property.isSold())
+            throw new PropertyAlreadySold();
+
+        Set<User> reqUsers = property.getReqUsers();
+
+        return reqUsers.stream().map(user -> mapStructMapper.userToUserDto(user)).collect(Collectors.toSet());
     }
 
     private boolean compareListsImages(List<Image> prevList , List<Image> nextList){
@@ -432,9 +462,9 @@ public class PropertyService {
 
         if(requestTokenHeader!=null && requestTokenHeader.startsWith("Bearer ")){
             jwtToken = requestTokenHeader.substring(7);
-
             try{
                 email = jwtUtil.extractUsername(jwtToken);
+
             }catch (ExpiredJwtException e){
                 throw new JwtTokenExpiredException();
             }catch (SignatureException | MalformedJwtException e){

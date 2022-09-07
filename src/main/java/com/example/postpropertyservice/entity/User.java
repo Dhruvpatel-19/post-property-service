@@ -44,4 +44,6 @@ public class User {
     @OneToMany(mappedBy = "user" , orphanRemoval = true)
     private List<Favourites> favPropertyList;
 
+    @ManyToMany(mappedBy = "reqUsers")
+    private List<Property> reqPropertyList;
 }

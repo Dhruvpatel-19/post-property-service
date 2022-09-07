@@ -1,10 +1,10 @@
 package com.example.postpropertyservice.dto;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class UserDTO {
     private int userId;
     private String firstName;

@@ -28,4 +28,9 @@ public class OwnerController {
     public void updateOwner(@PathVariable("id") int id ,@RequestBody Owner updatedOwner){
         ownerService.updateOwner(id , updatedOwner);
     }
+
+    @DeleteMapping(value = "/delete/{id}")
+    public void deleteOwner(@PathVariable("id") int id){
+        ownerService.deleteOwner(id);
+    }
 }

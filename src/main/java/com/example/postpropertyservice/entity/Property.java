@@ -90,5 +90,5 @@ public class Property {
     @ManyToMany(targetEntity = User.class)
     @JoinTable(name = "property_requser" , joinColumns = @JoinColumn(name = "property_id") , inverseJoinColumns = @JoinColumn(name="user_id"))
     @JsonIgnore
-    private Set<User> reqUser;
+    private Set<User> reqUsers;
 }
