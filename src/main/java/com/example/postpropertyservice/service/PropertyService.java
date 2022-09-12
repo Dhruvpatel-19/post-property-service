@@ -21,7 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -349,6 +350,7 @@ public class PropertyService {
 
         if(owner.getEmail().equals(property.getOwner().getEmail())){
             favouritesRepository.deleteByProperty(property);
+            userReqPropertyRepository.deleteByProperty(property);
             restTemplate.delete("http://localhost:8081/callGuestService/deleteProperty/"+id);
             propertyRepository.deleteById(id);
             return mapStructMapper.propertyToPropertyDto(property);

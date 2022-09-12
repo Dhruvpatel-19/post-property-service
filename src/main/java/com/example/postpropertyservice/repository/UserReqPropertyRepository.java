@@ -14,4 +14,6 @@ public interface UserReqPropertyRepository extends JpaRepository<UserReqProperty
     List<UserReqProperty> findByProperty(Property property);
 
     boolean existsByUserAndProperty(User user, Property property);
+
+    void deleteByProperty(Property property);
 }
